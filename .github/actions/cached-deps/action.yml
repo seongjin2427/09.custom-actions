@@ -1,0 +1,22 @@
+name: "Get & Cache Dependencies"
+# 커스텀 액션은 on 키를 지정하지 않습니다.
+# 마켓플레이스에 퍼블리쉬되면 보일 설명입니다.
+description: "Get the dependencies and (via npm) cache them."
+runs:
+  using: "composite"
+  steps:
+    # deploy.yml 파일에서 분리할 Step을 붙여넣습니다.
+    - name: Cache dependencies
+      id: cache
+      # uses 키를 사용할 때는 별도의 키를 추가하지 않아도 됩니다.
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    # 여전히 작성된 모든 키를 지원하기 때문에 유지 가능합니다.
+    - name: Install dependencies
+      # 아래 조건문도 여전히 동일하게 수행되어야 하기 때문에 변경사항이 없습니다.
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci
+      # 커스텀 composite action에서 run을 실행할 때, 반드시 shell 키를 포함해야 합니다.
+      shell: bash

@@ -9,15 +9,12 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+      - name: Load & cache dependencies
+        # 독립 레포지토리로 커스텀 액션을 분리하게 되면
+        # 단순히 레포지토리 식별자를 기입하면 됩니다. ex) uses: seongjin2427/my-action
+        # 지금은 동일 프로젝트 내의 커스텀 액션이기 때문에, 루트 폴더 기준 경로를 작성합니다.
+        # GitHub Actions가 자동적으로 action.yml을 바라보기 때문에 기입하지 않습니다.
+        uses: ./.github/actions/cached-deps
       - name: Lint code
         run: npm run lint
   test:
