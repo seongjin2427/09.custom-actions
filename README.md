@@ -52,6 +52,7 @@
               run: npm ci
               # 커스텀 composite action에서 run을 실행할 때, 반드시 shell 키를 포함해야 합니다.
               shell: bash
+    - 참고 - [Custom Action 관련](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions)
 
   - Custom Composite Action을 `deploy.yml` 파일에 적용해 봅니다.
     - `./.github/workflows/deploy.yml`
@@ -80,32 +81,36 @@
 - Result
   - `./.github/actions/cached-deps/action.yml`로 분리하여 정의한 Custom Action이 정상적으로 동작하는 것을 확인할 수 있습니다.
 
-2. 다른 Job들에서 중복되는 Step들도 교체합니다. - 
+2. 다른 Job들에서 중복되는 Step들도 교체합니다. - [`f18c37e8`](https://github.com/seongjin2427/09.custom-actions/commit/f18c37e81eac08a0d478a2ffe18fbbfeee76168b)
 
 - Process
   - `./.github/workflows/deploy.yml`
   - ```yml
     ...
-        # Composite Action으로 교체
-        - name: Load & cache dependencies
-          uses: ./.github/actions/cached-deps
-        - name: Test code
-          id: run-tests
-          run: npm run test
-        ...
+      test:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Get code
+            uses: actions/checkout@v3
+          # Composite Action으로 교체      
+          - name: Load & cache dependencies
+            uses: ./.github/actions/cached-deps
+          - name: Test code
+            id: run-tests
+            run: npm run test
+          ...
 
-        build:
-          needs: test
-          runs-on: ubuntu-latest
-          steps:
-            - name: Get code
-              uses: actions/checkout@v3
-              # Composite Action으로 교체
-            - name: Load & cache dependencies
-              uses: ./.github/actions/cached-deps
-            - name: Build website
-              run: npm run build
-            ...
-
+      build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+          - name: Get code
+            uses: actions/checkout@v3
+            # Composite Action으로 교체
+          - name: Load & cache dependencies
+            uses: ./.github/actions/cached-deps
+          - name: Build website
+            run: npm run build
+          ...
 - Result
-  -             
+  - `test`, `build` Job에서도 Composite Action으로 교체하여도 정상적으로 동작하는 것을 확인할 수 있습니다.
