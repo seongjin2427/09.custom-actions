@@ -22,7 +22,7 @@
 
 ## Composite Actions
 
-1. Custom Composite Action을 분리하기 위한 별도의 파일을 만들어 정의해 봅니다.
+1. Custom Composite Action을 분리하기 위한 별도의 파일을 만들어 정의해 봅니다. - [`3dd1e249`](https://github.com/seongjin2427/09.custom-actions/commit/3dd1e24963cebccf502841ef1ed4683ff66bcd85)
 
 - Process
   - `./.github/actions/ached-deps/action.yml`
@@ -78,4 +78,4 @@
               ...
 
 - Result
-  
+  - `./.github/actions/cached-deps/action.yml`로 분리하여 정의한 Custom Action이 정상적으로 동작하는 것을 확인할 수 있습니다.
