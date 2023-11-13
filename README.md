@@ -79,3 +79,33 @@
 
 - Result
   - `./.github/actions/cached-deps/action.yml`로 분리하여 정의한 Custom Action이 정상적으로 동작하는 것을 확인할 수 있습니다.
+
+2. 다른 Job들에서 중복되는 Step들도 교체합니다. - 
+
+- Process
+  - `./.github/workflows/deploy.yml`
+  - ```yml
+    ...
+        # Composite Action으로 교체
+        - name: Load & cache dependencies
+          uses: ./.github/actions/cached-deps
+        - name: Test code
+          id: run-tests
+          run: npm run test
+        ...
+
+        build:
+          needs: test
+          runs-on: ubuntu-latest
+          steps:
+            - name: Get code
+              uses: actions/checkout@v3
+              # Composite Action으로 교체
+            - name: Load & cache dependencies
+              uses: ./.github/actions/cached-deps
+            - name: Build website
+              run: npm run build
+            ...
+
+- Result
+  -             
