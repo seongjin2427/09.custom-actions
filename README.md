@@ -20,7 +20,7 @@
 
 ---
 
-## Composite Actions
+## Composite Action
 
 1. Custom Composite Action을 분리하기 위한 별도의 파일을 만들어 정의해 봅니다. - [`3dd1e249`](https://github.com/seongjin2427/09.custom-actions/commit/3dd1e24963cebccf502841ef1ed4683ff66bcd85)
 
@@ -285,3 +285,81 @@
 
 - Result
   - `lint` Job의 `Outputs Information` Step에서 `false`로 정상적으로 출력됩니다.
+
+<br>
+
+---
+
+## JavaScript Action
+- 본 프로젝트를 빌드하여 생성되는 정적페이지를 AWS S3 버켓에 업로드합니다.
+
+1. `./.github/actions` 폴더 하위에 `deploy-s3-javascript` 폴더와 그 하위에 `action.yml` 파일과 `main.js` 파일을 생성하여 정의하고, `workflows/deploy.yml` 파일에 새로운 Job을 추가합니다. - 
+
+- Process
+  - `./.github/actions/deploy-s3-javascript/action.yml`
+    - ```yml
+      # Custom Action의 이름을 지정합니다.
+      name: "Deploy to AWS S3"
+      # Custom Action의 설명을 작성합니다.
+      description: "Deploy a static website via AWS S3."
+      # Custom Action이기 때문에 on 키로 트리거 하는 것이 아닌
+      # runs 키로 어떤 방식으로 실행할 지 지정합니다.
+      runs: 
+        # JavaScript 런타임 환경인 Node의 버전을 지정합니다.
+        # 현재 node20이 사용할 수 있는 가장 최신 버전입니다.
+        # 
+        using: 'node16'
+        # JavaScript Action에서 main 키는 필수 입니다.
+        # Custom Action이 실행될 때, 실행할 JavaScript 파일의 경로를 지정합니다.
+        main: 'main.js'
+        # pre, post키를 통해 main에서 지정한 JavaScript 파일을
+        # 실행하기 전, 후에 실행할 JavaScript 파일을 지정할 수 있습니다.
+
+  - 터미널에서 `.github/actions/deploy-s3-javascript` 폴더로 이동하여 `npm init -y` 명령어를 실행하여 패키지 설치 환경을 설정합니다.
+  - `npm install actions/core actions/github actions/exec` 명령어를 실행하여 JavaScript Action을 실행하기 위한 패키지 3가지를 설치합니다.
+    - `actions/core`, `actions/github`, `actions/exec`
+  - `./.github/actions/deploy-s3-javascript/main.js`
+    - ```js
+      // 필요한 패키지 3가지를 가져와서 사용합니다.
+      // 지금은 작동 여부를 확실히 하기 위해서 core.notice 메서드만 간단히 활용해 봅니다.
+      const core = require("@actions/core");
+      const github = require("@actions/github");
+      const exec = require("@actions/exec");
+
+      function run() {
+        core.notice("Hello from my custom JavaScript Action!");
+      }
+
+      run();
+  
+  - `main.js` 파일이 정상적으로 작동하는지 확인하기 위해, `deploy.yml` 파일에 새로운 Job(`information`)을 추가합니다.
+    - ```yml
+      ...
+
+      jobs:
+        ... 
+
+        # JavaScript Action 실행을 위한 Step을 추가합니다.
+        information:
+          runs-on: ubuntu-latest
+          steps:
+            # 기존 코드를 러너에 먼저 다운로드 해야 JavaScript Action도 실행할 수 있습니다.
+            - name: Get code
+              uses: actions/checkout@v3
+            # JavaScript Action을 실행합니다.
+            - name: Run custom action
+              uses: ./.github/actions/deploy-s3-javascript
+  
+  - 주의할 것
+    - 패키지 설치 후, 생성되는 `node_modules` 폴더는 `.gitignore`의 대상이 되면 안됩니다.
+      - JavaScript Action은 별도의 패키지를 설치할 수 없어 함께 레포지토리에 포함되어야 합니다.
+    - `dist` 역시 `.gitignore`의 대상이 되면 안됩니다.
+      - 위와 동일한 이유로 루트 레벨의 dist 폴더만 무시될 수 있도록 `/dist`으로 대체하여 적용합니다.
+
+  - 참고
+    - [`runs` for JavaScript Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-javascript-actions)
+    - [Creating a JavaScript action](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action)
+    - [actions/toolkit](https://github.com/actions/toolkit)
+
+- Result
+  - 

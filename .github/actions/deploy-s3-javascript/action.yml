@@ -1,0 +1,16 @@
+# Custom Action의 이름을 지정합니다.
+name: "Deploy to AWS S3"
+# Custom Action의 설명을 작성합니다.
+description: "Deploy a static website via AWS S3."
+# Custom Action이기 때문에 on 키로 트리거 하는 것이 아닌
+# runs 키로 어떤 방식으로 실행할 지 지정합니다.
+runs: 
+  # JavaScript 런타임 환경인 Node의 버전을 지정합니다.
+  # 현재 node20이 사용할 수 있는 가장 최신 버전입니다.
+  # 
+  using: 'node16'
+  # JavaScript Action에서 main 키는 필수 입니다.
+  # Custom Action이 실행될 때, 실행할 JavaScript 파일의 경로를 지정합니다.
+  main: 'main.js'
+  # pre, post키를 통해 main에서 지정한 JavaScript 파일을
+  # 실행하기 전, 후에 실행할 JavaScript 파일을 지정할 수 있습니다.

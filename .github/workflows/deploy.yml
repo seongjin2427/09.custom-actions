@@ -10,13 +10,10 @@ jobs:
       - name: Get code
         uses: actions/checkout@v3
       - name: Load & cache dependencies
-        # Custom Action의 outputs을 가져올 수 있도록 id를 지정합니다.
         id: cached-deps
         uses: ./.github/actions/cached-deps
         with:
           caching: false
-      # 별도의 Step에서 id로 지정한 위 cached-deps Custom Action에서 내보내진
-      # outputs 값을 출력합니다.
       - name: Outputs Information
         run: echo "Cache used? ${{ steps.cached-deps.outputs.used-cache }}"
       - name: Lint code
@@ -71,3 +68,13 @@ jobs:
         run: ls
       - name: Deploy site
         run: echo "Deploying..."
+  # JavaScript Action 실행을 위한 Step을 추가합니다.
+  information:
+    runs-on: ubuntu-latest
+    steps:
+      # 기존 코드를 러너에 먼저 다운로드 해야 JavaScript Action도 실행할 수 있습니다.
+      - name: Get code
+        uses: actions/checkout@v3
+      # JavaScript Action을 실행합니다.
+      - name: Run custom action
+        uses: ./.github/actions/deploy-s3-javascript
