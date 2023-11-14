@@ -456,7 +456,7 @@
 - Result
   - AWS S3 버킷에 빌드한 파일이 업로드 된 것을 확인할 수 있고, 호스팅 된 정적 페이지에도 접근이 가능합니다.
 
-3. AWS S3 버킷으로 자동 업로드 후, `outputs`키 값을 사용하여 호스팅 된 웹 사이트 URL을 로그에 출력합니다. - 
+3. AWS S3 버킷으로 자동 업로드 후, `outputs`키 값을 사용하여 호스팅 된 웹 사이트 URL을 로그에 출력합니다. - [`c3d9433b`](https://github.com/seongjin2427/09.custom-actions/commit/c3d9433b2da1138c385e32b963ead5fd8c4c5740)
 
 - Process
   - `deploy-s3-javascript/action.yml`
@@ -502,7 +502,7 @@
         exec.exec(`aws s3 sync ${distFolder} ${s3Uri} --region ${bucketRegion}`);
 
         // AWS S3에서 정적 페이지를 호스팅하게 되면, 아래와 같은 규칙으로 웹 사이트의 URL을 생성하여 발행합니다.
-        const websiteUrl = `http://${bucket}.s3-website-${bucketRegion}.amazonaws.com`;
+        const websiteUrl = `http://${bucket}.s3-website.${bucketRegion}.amazonaws.com`;
         // core.setOutput(output 이름, output 이름으로 반환할 값)
         core.setOutput("website-url", websiteUrl);
       }
@@ -530,4 +530,4 @@
               echo "Live URL: ${{ steps.deploy.outputs.website-url }}"
 
 - Result
-  - 
+  - 출력된 웹 사이트 URL을 클릭하면 해당 프로젝트의 정적 페이지로 접속됩니다.
