@@ -293,7 +293,7 @@
 ## JavaScript Action
 - 본 프로젝트를 빌드하여 생성되는 정적페이지를 AWS S3 버켓에 업로드합니다.
 
-1. `./.github/actions` 폴더 하위에 `deploy-s3-javascript` 폴더와 그 하위에 `action.yml` 파일과 `main.js` 파일을 생성하여 정의하고, `workflows/deploy.yml` 파일에 새로운 Job을 추가합니다. - 
+1. `./.github/actions` 폴더 하위에 `deploy-s3-javascript` 폴더와 그 하위에 `action.yml` 파일과 `main.js` 파일을 생성하여 정의하고, `workflows/deploy.yml` 파일에 새로운 Job을 추가합니다. - [`4b88c224`](https://github.com/seongjin2427/09.custom-actions/commit/4b88c22469b11633144e0799550ca0ab3c6e0091)
 
 - Process
   - `./.github/actions/deploy-s3-javascript/action.yml`
@@ -362,4 +362,4 @@
     - [actions/toolkit](https://github.com/actions/toolkit)
 
 - Result
-  - 
+  - 정상적으로 JavaScript Aciton이 실행되는 것을 확인할 수 있습니다.
