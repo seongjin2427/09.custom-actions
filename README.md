@@ -155,7 +155,7 @@
 - Result
   - `inputs` 지정 및 `Install dependencies` Step의 조건 추가로, `caching` input의 값이 `true`가 아닌 경우에는 캐싱이 일어나지 않습니다.
 
-4. `cache-deps`를 통한 캐싱 여부를 명시적으로 표현하기 위해서 각 Job의 Step 별로 `caching`을 지정합니다. -
+4. `cache-deps`를 통한 캐싱 여부를 명시적으로 표현하기 위해서 각 Job의 Step 별로 `caching`을 지정합니다. - [`a958ebd4`](https://github.com/seongjin2427/09.custom-actions/commit/a958ebd4cfa40c80a61e01db45594320ba030d0d)
 
 - Process
   - `./.github/workflow/deploy.yml`
@@ -212,3 +212,4 @@
             ...
 
 - Result
+  - `lint` Job에서 캐싱이 이루어지고, 나머지 다른 Job들에 대해서는 캐싱된 의존성들을 활용하여 워크플로우가 진행됩니다.
