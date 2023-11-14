@@ -155,3 +155,60 @@
 - Result
   - `inputs` 지정 및 `Install dependencies` Step의 조건 추가로, `caching` input의 값이 `true`가 아닌 경우에는 캐싱이 일어나지 않습니다.
 
+4. `cache-deps`를 통한 캐싱 여부를 명시적으로 표현하기 위해서 각 Job의 Step 별로 `caching`을 지정합니다. -
+
+- Process
+  - `./.github/workflow/deploy.yml`
+  - ```yml
+    name: Deployment
+    on:
+      push:
+        branches:
+          - main
+    jobs:
+      lint:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Get code
+            uses: actions/checkout@v3
+          - name: Load & cache depeandencies
+            uses: ./.github/actions/cached-deps
+            with:
+              # 제일 처음 의존성을 설치하는 단계에서
+              # 명시적으로 캐싱이 되지 않는다는 것을 표현하기도 하고
+              # 의존성을 최초로 설치를 해야 하기 때문에 'caching: false'로 지정합니다.
+              caching: false
+          - name: Lint code
+            run: npm run lint
+      test:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Get code
+            uses: actions/checkout@v3
+          - name: Load & cache dependencies
+            uses: ./.github/actions/cached-deps
+            with:
+              # 이후의 Job에서의 Custom Action에서는 'caching: true'로 지정하여
+              # 앞전 lint Job에서의 캐시를 활용할 수 있도록 합니다.
+              caching: true
+          - name: Test code
+            id: run-tests
+            run: npm run test
+            ...
+      build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+          - name: Get code
+            uses: actions/checkout@v3
+          - name: Load & cache dependencies
+            uses: ./.github/actions/cached-deps
+            with:
+              # 이후의 Job에서의 Custom Action에서는 'caching: true'로 지정하여
+              # 앞전 lint Job에서의 캐시를 활용할 수 있도록 합니다.
+              caching: true
+          - name: Build website
+            run: npm run build
+            ...
+
+- Result
