@@ -1,21 +1,23 @@
-# JavaScript Custom Action의 이름을 지정합니다.
 name: "Deploy to AWS S3"
 description: "Deploy a static website via AWS S3."
-# 재사용을 위해 inputs 값을 입력받도록 지정합니다.
 inputs:
-  # 업로드 할 AWS S3 버킷 이름을 필수로 입력 받습니다.
   bucket:
     description: "The S3 bucket name."
     required: true
-  # 버킷 리전을 지정합니다. (기본값은 서울로 지정했습니다.)
   bucket-region:
     description: "The region of the S3 bucket."
     required: false
     default: "ap-northeast-2"
-  # 업로드 할 파일이 존재하는 경로를 입력받습니다.
   dist-folder:
     description: "The folder containing the deployable files."
     required: true
+# inputs과 같은 레벨에서 outputs 값을 지정합니다.
+outputs:
+  # website url을 반환할 키 값을 원하는 대로 지정합니다.
+  website-url:
+    # Composite Action과 달리 value 키를 여기서 지정하지 않습니다.
+    # JavaScript Action의 value는 main.js에서 지정합니다.
+    description: "The URL of the deployed website."
 runs:
   using: "node16"
   main: "main.js"

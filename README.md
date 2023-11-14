@@ -455,3 +455,79 @@
 
 - Result
   - AWS S3 버킷에 빌드한 파일이 업로드 된 것을 확인할 수 있고, 호스팅 된 정적 페이지에도 접근이 가능합니다.
+
+3. AWS S3 버킷으로 자동 업로드 후, `outputs`키 값을 사용하여 호스팅 된 웹 사이트 URL을 로그에 출력합니다. - 
+
+- Process
+  - `deploy-s3-javascript/action.yml`
+    - ```yml
+      name: "Deploy to AWS S3"
+      description: "Deploy a static website via AWS S3."
+      inputs:
+        bucket:
+          description: "The S3 bucket name."
+          required: true
+        bucket-region:
+          description: "The region of the S3 bucket."
+          required: false
+          default: "ap-northeast-2"
+        dist-folder:
+          description: "The folder containing the deployable files."
+          required: true
+      # inputs과 같은 레벨에서 outputs 값을 지정합니다.
+      outputs:
+        # website url을 반환할 키 값을 원하는 대로 지정합니다.
+        website-url:
+          # Composite Action과 달리 value 키를 여기서 지정하지 않습니다.
+          # JavaScript Action의 value는 main.js에서 지정합니다.
+          description: "The URL of the deployed website."
+      runs:
+        using: "node16"
+        main: "main.js"
+
+  - `deploy-s3-javascript/main.js`
+    - ```js
+      const core = require("@actions/core");
+      const github = require("@actions/github");
+      const exec = require("@actions/exec");
+
+      function run() {
+        // 1) input 값을 가져옵니다.
+        const bucket = core.getInput("bucket", { required: true });
+        const bucketRegion = core.getInput("bucket-region", { required: true });
+        const distFolder = core.getInput("dist-folder", { required: true });
+
+        // 2) 파일을 업로드 합니다.
+        const s3Uri = `s3://${bucket}`;
+        exec.exec(`aws s3 sync ${distFolder} ${s3Uri} --region ${bucketRegion}`);
+
+        // AWS S3에서 정적 페이지를 호스팅하게 되면, 아래와 같은 규칙으로 웹 사이트의 URL을 생성하여 발행합니다.
+        const websiteUrl = `http://${bucket}.s3-website-${bucketRegion}.amazonaws.com`;
+        // core.setOutput(output 이름, output 이름으로 반환할 값)
+        core.setOutput("website-url", websiteUrl);
+      }
+
+      run();
+
+  - `workflows/deploy.yml`
+    - ```yml
+      ...
+          - name: Output contents
+            run: ls
+          - name: Deploy site
+            # output 값을 참조하기 위한 id 값을 지정합니다.
+            id: deploy
+            uses: ./.github/actions/deploy-s3-javascript
+            env:
+              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            with:
+              bucket: gha-ito-custom-action-hosting
+              dist-folder: ./dist
+          # Deploy site Step에서 받을 output 값을 id(deploy)를 참조하여 로그로 출력합니다.
+          - name: Output information
+            run: |
+              echo "Live URL: ${{ steps.deploy.outputs.website-url }}"
+
+- Result
+  - 
