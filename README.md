@@ -538,7 +538,7 @@
 
 ## Docker Action
 
-1. 예제에서 주어지는 python 코드를 기반으로, 앞전 JavaScript Action 동작과 동일한 Docker Action을 실행해봅니다. - 
+1. 예제에서 주어지는 python 코드를 기반으로, 앞전 JavaScript Action 동작과 동일한 Docker Action을 실행해봅니다. - [`a5d45530`](https://github.com/seongjin2427/09.custom-actions/commit/a5d45530b0b1f6a3a4d6b06c083338bad47e0ea7)
   - `.github/actions/deploy-s3-docker` 폴더를 생성합니다.
   - 폴더 하위에 `action.yml`, `deployment.py`, `Dockerfile`, `requirements.txt`를 정의합니다.
   - `.github/workflows/deploy.yml` 일부를 업데이트 합니다.
@@ -594,13 +594,14 @@
                       ExtraArgs={"ContentType": mimetypes.guess_type(file)[0]}
                   )
 
-          website_url = f'http://{bucket}.s3-website-{bucket_region}.amazonaws.com'
+          website_url = f'http://{bucket}.s3-website.{bucket_region}.amazonaws.com'
           with open(os.environ['GITHUB_OUTPUT'], 'a') as gh_output:
               print(f'website-url={website_url}', file=gh_output)
 
 
       if __name__ == '__main__':
           run()
+
   - `Dockerfile`
     - ```Dockerfile
       FROM python:3
@@ -642,4 +643,4 @@
               echo "Live URL: ${{ steps.deploy.outputs.website-url }}"
 
 - Result
-  - 
+  - 정상적으로 빌드 및 배포, 웹 사이트 URL까지 출력하는 것을 확인할 수 있습니다.
