@@ -12,9 +12,7 @@ function run() {
   const s3Uri = `s3://${bucket}`;
   exec.exec(`aws s3 sync ${distFolder} ${s3Uri} --region ${bucketRegion}`);
 
-  // AWS S3에서 정적 페이지를 호스팅하게 되면, 아래와 같은 규칙으로 웹 사이트의 URL을 생성하여 발행합니다.
   const websiteUrl = `http://${bucket}.s3-website.${bucketRegion}.amazonaws.com`;
-  // core.setOutput(output 이름, output 이름으로 반환할 값)
   core.setOutput("website-url", websiteUrl);
 }
 

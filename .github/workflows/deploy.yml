@@ -67,16 +67,16 @@ jobs:
       - name: Output contents
         run: ls
       - name: Deploy site
-        # output 값을 참조하기 위한 id 값을 지정합니다.
         id: deploy
-        uses: ./.github/actions/deploy-s3-javascript
+        # uses: ./.github/actions/deploy-s3-javascript
+        # javascript -> docker
+        uses: ./.github/actions/deploy-s3-docker
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         with:
           bucket: gha-ito-custom-action-hosting
           dist-folder: ./dist
-      # Deploy site Step에서 받을 output 값을 id(deploy)를 참조하여 로그로 출력합니다.
       - name: Output information
         run: |
           echo "Live URL: ${{ steps.deploy.outputs.website-url }}"

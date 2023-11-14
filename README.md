@@ -531,3 +531,115 @@
 
 - Result
   - 출력된 웹 사이트 URL을 클릭하면 해당 프로젝트의 정적 페이지로 접속됩니다.
+
+<br>
+
+---
+
+## Docker Action
+
+1. 예제에서 주어지는 python 코드를 기반으로, 앞전 JavaScript Action 동작과 동일한 Docker Action을 실행해봅니다. - 
+  - `.github/actions/deploy-s3-docker` 폴더를 생성합니다.
+  - 폴더 하위에 `action.yml`, `deployment.py`, `Dockerfile`, `requirements.txt`를 정의합니다.
+  - `.github/workflows/deploy.yml` 일부를 업데이트 합니다.
+
+- Process
+  - `action.yml`
+    - ```yml
+      name: "Deploy to AWS S3"
+      description: "Deploy a static website via AWS S3"
+      inputs:
+        bucket:
+          description: "The S3 bucket name."
+          required: true
+        bucket-region:
+          description: "The region of the S3 bucket."
+          required: false
+          default: "ap-northeast-2"
+        dist-folder:
+          description: "The folder containing the deployable files."
+          required: true
+      outputs:
+        website-url:
+          description: "The URL of the deployed website."
+      runs:
+        # JavaScript Action 대비 using과 image 키만 다릅니다.
+        using: "docker"
+        image: "Dockerfile"
+  
+  - `deployment.py`
+    - python 코드를 해석하기는 어렵지만, 대략적으로 JavaScript Action과 거의 유사하게 동작한다는 것을 확인할 수 있습니다.
+    - ```py
+      import os
+      import boto3
+      import mimetypes
+      from botocore.config import Config
+
+
+      def run():
+          bucket = os.environ['INPUT_BUCKET']
+          bucket_region = os.environ['INPUT_BUCKET-REGION']
+          dist_folder = os.environ['INPUT_DIST-FOLDER']
+
+          configuration = Config(region_name=bucket_region)
+
+          s3_client = boto3.client('s3', config=configuration)
+
+          for root, subdirs, files in os.walk(dist_folder):
+              for file in files:
+                  s3_client.upload_file(
+                      os.path.join(root, file),
+                      bucket,
+                      os.path.join(root, file).replace(dist_folder + '/', ''),
+                      ExtraArgs={"ContentType": mimetypes.guess_type(file)[0]}
+                  )
+
+          website_url = f'http://{bucket}.s3-website-{bucket_region}.amazonaws.com'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as gh_output:
+              print(f'website-url={website_url}', file=gh_output)
+
+
+      if __name__ == '__main__':
+          run()
+  - `Dockerfile`
+    - ```Dockerfile
+      FROM python:3
+
+      COPY requirements.txt /requirements.txt
+
+      RUN pip install -r requirements.txt
+
+      COPY deployment.py /deployment.py
+
+      CMD ["python", "/deployment.py"]
+
+  - `requirements.txt`
+    - ```text
+      boto3==1.24.71
+      botocore==1.27.71
+      jmespath==1.0.1
+      python-dateutil==2.8.2
+      s3transfer==0.6.0
+      six==1.16.0
+      urllib3==1.26.12
+
+  - `workflows/deploy.yml`
+    - ```yml
+      ...
+          - name: Deploy site
+            id: deploy
+            # uses: ./.github/actions/deploy-s3-javascript
+            # javascript -> docker
+            uses: ./.github/actions/deploy-s3-docker
+            env:
+              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            with:
+              bucket: gha-ito-custom-action-hosting
+              dist-folder: ./dist
+          - name: Output information
+            run: |
+              echo "Live URL: ${{ steps.deploy.outputs.website-url }}"
+
+- Result
+  - 
