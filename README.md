@@ -114,3 +114,43 @@
           ...
 - Result
   - `test`, `build` Job에서도 Composite Action으로 교체하여도 정상적으로 동작하는 것을 확인할 수 있습니다.
+
+3. `cache-deps` Custom Action에 `inputs`을 추가하여 사용 시, 별도의 input 값을 작성, 캐시 여부를 지정할 수 있도록 합니다. - 
+
+- Process
+  - `./.github/actions/cached-deps/action.yml`
+  - ```yml
+    name: "Get & Cache Dependencies"
+    description: "Get the dependencies and (via npm) cache them."
+    # Custom Action Type에 상관없이 name과 동일한 레벨에서
+    # inputs 키를 지정하여 활용할 수 있습니다.
+    inputs:
+      # 원하는 input 키 이름을 지정할 수 있습니다.
+      caching:
+        # 반드시 지정되어야 합니다.
+        description: 'Whether to cache dependencies or not.'
+        # 반드시 해당 input이 존재해야 하는지 여부를 결정합니다.
+        # required: true
+        required: false
+        # 기본 input 값을 지정할 수 있습니다.
+        default: 'true'
+    runs:
+      using: "composite"
+      steps:
+        - name: Cache dependencies
+          # Custom Action에서 inputs 컨텍스트로 각 input 값에 접근할 수 있습니다.
+          # caching input 값이 'true'일 때만 캐싱 Step을 실행합니다.
+          if: inputs.caching == 'true'
+          id: cache
+          uses: actions/cache@v3
+          with:
+            path: node_modules
+            key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+        - name: Install dependencies
+          # 조건 추가: caching input이 'true'가 아닐 때에도 실행되어야 합니다.
+          if: steps.cache.outputs.cache-hit != 'true' || inputs.caching != 'true'
+          run: npm ci
+          shell: bash
+
+- Result
+  - 

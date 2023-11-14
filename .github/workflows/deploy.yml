@@ -18,7 +18,6 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      # Composite Action으로 교체
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-deps
       - name: Test code
@@ -36,7 +35,6 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-        # Composite Action으로 교체
       - name: Load & cache dependencies
         uses: ./.github/actions/cached-deps
       - name: Build website
