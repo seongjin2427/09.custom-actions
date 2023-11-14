@@ -364,7 +364,7 @@
 - Result
   - 정상적으로 JavaScript Aciton이 실행되는 것을 확인할 수 있습니다.
 
-2. AWS S3 버킷을 생성하고, 각 파일들을 업데이트 합니다. -
+2. AWS S3 버킷을 생성하고, 각 파일들을 업데이트 합니다. - [`2603c477`](https://github.com/seongjin2427/09.custom-actions/commit/2603c4778e90db88769d1bc8dc3fa208c9d94f6c)
   - 재사용을 위해 `deploy-s3-javascript/action.yml` 파일에 `inputs` 값을 추가합니다.
   - `actions` 패키지를 활용하여 S3와 상호작용 하기 위해 `deploy-s3-javascript/main.js` 파일에 코드를 추가합니다.
   - AWS 보안 자격 증명에서 Access Key ID, Secret Access Key를 생성한 후, 레포지토리 Secrets을 등록합니다.
@@ -452,3 +452,6 @@
                 dist-folder: ./dist
 
   - 레포지토리 Action Secrets에 AWS의 Access ID와 Secrets Access key를 등록합니다.
+
+- Result
+  - AWS S3 버킷에 빌드한 파일이 업로드 된 것을 확인할 수 있고, 호스팅 된 정적 페이지에도 접근이 가능합니다.
