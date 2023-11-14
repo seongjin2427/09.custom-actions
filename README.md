@@ -214,7 +214,7 @@
 - Result
   - `lint` Job에서 캐싱이 이루어지고, 나머지 다른 Job들에 대해서는 캐싱된 의존성들을 활용하여 워크플로우가 진행됩니다.
 
-5. `cached-deps` Custom Action에 `outputs` 키를 추가하여 내보내고, `deploy.yml` 에서 가져와 출력해 봅니다. - 
+5. `cached-deps` Custom Action에 `outputs` 키를 추가하여 내보내고, `deploy.yml` 에서 가져와 출력해 봅니다. - [`0f595470`](https://github.com/seongjin2427/09.custom-actions/commit/0f595470ceb90af82d72465c8eaaf3282dac343a)
 
 - Process
   - `./.github/acitons/cached-deps/action.yml`
@@ -284,4 +284,4 @@
       ...
 
 - Result
-  - 
+  - `lint` Job의 `Outputs Information` Step에서 `false`로 정상적으로 출력됩니다.
