@@ -115,7 +115,7 @@
 - Result
   - `test`, `build` Job에서도 Composite Action으로 교체하여도 정상적으로 동작하는 것을 확인할 수 있습니다.
 
-3. `cache-deps` Custom Action에 `inputs`을 추가하여 사용 시, 별도의 input 값을 작성, 캐시 여부를 지정할 수 있도록 합니다. - 
+3. `cache-deps` Custom Action에 `inputs`을 추가하여 사용 시, 별도의 input 값을 작성, 캐시 여부를 지정할 수 있도록 합니다. - [`3f2df567`](https://github.com/seongjin2427/09.custom-actions/commit/3f2df567b68e65a8b744c6399c503ea665d259e1)
 
 - Process
   - `./.github/actions/cached-deps/action.yml`
@@ -153,4 +153,5 @@
           shell: bash
 
 - Result
-  - 
+  - `inputs` 지정 및 `Install dependencies` Step의 조건 추가로, `caching` input의 값이 `true`가 아닌 경우에는 캐싱이 일어나지 않습니다.
+
