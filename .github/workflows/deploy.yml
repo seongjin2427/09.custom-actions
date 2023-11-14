@@ -67,14 +67,13 @@ jobs:
       - name: Output contents
         run: ls
       - name: Deploy site
-        run: echo "Deploying..."
-  # JavaScript Action 실행을 위한 Step을 추가합니다.
-  information:
-    runs-on: ubuntu-latest
-    steps:
-      # 기존 코드를 러너에 먼저 다운로드 해야 JavaScript Action도 실행할 수 있습니다.
-      - name: Get code
-        uses: actions/checkout@v3
-      # JavaScript Action을 실행합니다.
-      - name: Run custom action
+        # JavaScript Action을 사용하기 위해 경로를 지정합니다.
         uses: ./.github/actions/deploy-s3-javascript
+        # AWS S3 CLI를 통해 S3 버킷에 접근하기 위한 Access Key를 secrets으로 지정합니다.
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # JavaScript Action에서 지정한 inputs 값을 지정합니다.
+        with:
+          bucket: gha-ito-custom-action-hosting
+          dist-folder: ./dist

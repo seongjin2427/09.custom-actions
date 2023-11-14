@@ -363,3 +363,92 @@
 
 - Result
   - 정상적으로 JavaScript Aciton이 실행되는 것을 확인할 수 있습니다.
+
+2. AWS S3 버킷을 생성하고, 각 파일들을 업데이트 합니다. -
+  - 재사용을 위해 `deploy-s3-javascript/action.yml` 파일에 `inputs` 값을 추가합니다.
+  - `actions` 패키지를 활용하여 S3와 상호작용 하기 위해 `deploy-s3-javascript/main.js` 파일에 코드를 추가합니다.
+  - AWS 보안 자격 증명에서 Access Key ID, Secret Access Key를 생성한 후, 레포지토리 Secrets을 등록합니다.
+    - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+  - `workflows/deploy.yml`의 `deploy` Job에 `Deploy site` Step을 업데이트 합니다.
+
+- Process
+  - `.github/actions/deploy-s3-javascript/action.yml`
+    - ```yml
+      # JavaScript Custom Action의 이름을 지정합니다.
+      name: "Deploy to AWS S3"
+      description: "Deploy a static website via AWS S3."
+      # 재사용을 위해 inputs 값을 입력받도록 지정합니다.
+      inputs:
+        # 업로드 할 AWS S3 버킷 이름을 필수로 입력 받습니다.
+        bucket:
+          description: "The S3 bucket name."
+          required: true
+        # 버킷 리전을 지정합니다. (기본값은 서울로 지정했습니다.)
+        bucket-region:
+          description: "The region of the S3 bucket."
+          required: false
+          default: "ap-northeast-2"
+        # 업로드 할 파일이 존재하는 경로를 입력받습니다.
+        dist-folders:
+          description: "The folder containing the deployable files."
+          required: true
+      runs:
+        using: "node16"
+        main: "main.js"
+
+  - `.github/actions/deploy-s3-javascript/main.js`
+    - ```js
+      const core = require("@actions/core");
+      const github = require("@actions/github");
+      const exec = require("@actions/exec");
+
+      function run() {
+        // 1) input 값을 가져옵니다.
+        const bucket = core.getInput("bucket", { required: true });
+        const bucketRegion = core.getInput("bucket-region", { required: true });
+        const distFolder = core.getInput("dist-folder", { required: true });
+
+        // 참고
+        // github.getOctokit: GitHub REST API 요청을 쉽게 보낼 수 있습니다.
+        // github.context: GitHub Action 파일 내부에서 참조하는 컨텍스트와 같은 값을 일부 참조할 수 있습니다.
+
+        // 2) 파일을 업로드 합니다.
+        const s3Uri = `s3://${bucket}`;
+        // local-folder, s3-bucket flag와 함께 AWS CLI를 실행할 수 있습니다.
+        // exec.exec('aws s3 sync <local-folder> <s3-bucket> --region <bucket-region>');
+        exec.exec(`aws s3 sync ${distFolder} ${s3Uri} --region ${bucketRegion}`);
+
+        core.notice("Hello from my custom JavaScript Action!");
+      }
+
+      run();
+
+  - `.github/workflows/deploy.yml`
+    - ```yml
+      ...
+        deploy:
+          needs: build
+          runs-on: ubuntu-latest
+          steps:
+            - name: Get code
+              uses: actions/checkout@v3
+            - name: Get build artifacts
+              uses: actions/download-artifact@v3
+              with:
+                name: dist-files
+                path: ./dist
+            - name: Output contents
+              run: ls
+            - name: Deploy site
+              # JavaScript Action을 사용하기 위해 경로를 지정합니다.
+              uses: ./.github/actions/deploy-s3-javascript
+              # AWS S3 CLI를 통해 S3 버킷에 접근하기 위한 Access Key를 secrets으로 지정합니다.
+              env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              # JavaScript Action에서 지정한 inputs 값을 지정합니다.
+              with:
+                bucket: gha-ito-custom-action-hosting
+                dist-folder: ./dist
+
+  - 레포지토리 Action Secrets에 AWS의 Access ID와 Secrets Access key를 등록합니다.
