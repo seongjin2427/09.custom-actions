@@ -5,6 +5,16 @@ inputs:
     description: 'Whether to cache dependencies or not.'
     required: false
     default: 'true'
+# inputs 키와 동일한 레벨에서 outputs을 지정합니다.
+outputs:
+  # 원하는 output 키를 지정할 수 있습니다.
+  used-cache:
+    # 해당 output의 설명을 작성합니다.
+    description: 'Whether the cache was used.'
+    # 내보낼 값을 지정합니다.
+    # steps 컨텍스트를 사용, step들 중 install Step에서
+    # $GITHUB_OUTPUT으로 지정한 값 (cache='${{ inputs.caching }}')을 value로 할당합니다.
+    value: ${{ steps.install.outputs.cache }}
 runs:
   using: "composite"
   steps:
@@ -16,6 +26,11 @@ runs:
         path: node_modules
         key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
     - name: Install dependencies
+      # output의 value를 할당할 Step에 id를 지정합니다. (value: steps.install)
+      id: install
       if: steps.cache.outputs.cache-hit != 'true' || inputs.caching != 'true'
-      run: npm ci
+      # 값을 할당하기 위해 멀티 라인 구문으로 변경합니다.
+      run: |
+        npm ci
+        echo "cache='${{ inputs.caching }}'" >> $GITHUB_OUTPUT
       shell: bash
